@@ -6,6 +6,7 @@ import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,15 +19,19 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/v1/auth")
 public class AuthenticationControllerImpl implements AuthenticationController {
-
-    private static final String SET_COOKIE_FORMAT = "b=%s; Path=/; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
-    private static final String B_COOKIE_DOMAIN = "b.cookie.domain";
     
+    private static final String B_COOKIE_DOMAIN = "b.cookie.domain";
+    private static final String SET_COOKIE_HEADER_NAME = "Set-Cookie";
+    private static final String SET_COOKIE_FORMAT = "b=%s; Path=/; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
+
+    private final Environment environment;
     private final AuthenticationService authenticationService;
 
     @Autowired
-    public AuthenticationControllerImpl(AuthenticationService authenticationService) {
+    public AuthenticationControllerImpl(AuthenticationService authenticationService,
+                                        Environment environment) {
         this.authenticationService = authenticationService;
+        this.environment = environment;
     }
     
     @GetMapping
@@ -66,10 +71,10 @@ public class AuthenticationControllerImpl implements AuthenticationController {
                 final String cookieDomain = String.format(
                     SET_COOKIE_FORMAT,
                     authenticateResponse.getToken(),
-                    System.getProperty(B_COOKIE_DOMAIN)
+                    environment.getProperty(B_COOKIE_DOMAIN)
                 );
     
-                response.addHeader("Set-Cookie", cookieDomain);
+                response.addHeader(SET_COOKIE_HEADER_NAME, cookieDomain);
                 
                 return AuthenticateResponse.builder()
                     .user(authenticateResponse.getUser())
