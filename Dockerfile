@@ -4,7 +4,7 @@ LABEL maintainer="willian.azevedo (willian-mga@hotmail.com)"
 
 ADD target/reactive-chat-auth-service.jar /opt/auth/reactive-chat-auth-service.jar
 
-WORKDIR /opt/chat
+WORKDIR /opt/auth
 
 EXPOSE 8080
 

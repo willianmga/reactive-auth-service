@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/v1/auth")
 public class AuthenticationControllerImpl implements AuthenticationController {
 
-    private static final String SET_COOKIE_FORMAT = "user_session=%s; Path=/; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
+    private static final String SET_COOKIE_FORMAT = "b=%s; Path=/; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
     private static final String B_COOKIE_DOMAIN = "b.cookie.domain";
     
     private final AuthenticationService authenticationService;
@@ -30,7 +30,6 @@ public class AuthenticationControllerImpl implements AuthenticationController {
     }
     
     @GetMapping
-    @RequestMapping("/test")
     // TODO: remove test endpoint
     public String test(HttpServletRequest request) {
         
@@ -67,8 +66,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
                 final String cookieDomain = String.format(
                     SET_COOKIE_FORMAT,
                     authenticateResponse.getToken(),
-                    "socialchat.com"
-                    //System.getProperty(B_COOKIE_DOMAIN)
+                    System.getProperty(B_COOKIE_DOMAIN)
                 );
     
                 response.addHeader("Set-Cookie", cookieDomain);
