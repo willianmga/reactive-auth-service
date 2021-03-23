@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/v1/auth")
 public class AuthenticationControllerImpl implements AuthenticationController {
 
-    private static final String SET_COOKIE_FORMAT = "b=%s; Path=/; Domain=%s; SameSite=None; Max-Age=300; Secure; HttpOnly;";
+    private static final String SET_COOKIE_FORMAT = "user_session=%s; Path=/; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
     private static final String B_COOKIE_DOMAIN = "b.cookie.domain";
     
     private final AuthenticationService authenticationService;
@@ -30,6 +30,21 @@ public class AuthenticationControllerImpl implements AuthenticationController {
     }
     
     @GetMapping
+    @RequestMapping("/test")
+    // TODO: remove test endpoint
+    public String test(HttpServletRequest request) {
+        
+        String value = (request.getCookies() != null)
+            ? Arrays.toString(request.getCookies())
+            : "NO-COOKIES";
+        
+        System.out.println(value);
+        
+        return "{}";
+    }
+    
+    @PostMapping
+    @RequestMapping("/test")
     // TODO: remove test endpoint
     public String tst(HttpServletRequest request) {
     
@@ -48,11 +63,12 @@ public class AuthenticationControllerImpl implements AuthenticationController {
     
         return authenticationService.authenticate(authenticateRequest)
             .map(authenticateResponse -> {
-    
+
                 final String cookieDomain = String.format(
                     SET_COOKIE_FORMAT,
                     authenticateResponse.getToken(),
-                    System.getProperty(B_COOKIE_DOMAIN)
+                    "socialchat.com"
+                    //System.getProperty(B_COOKIE_DOMAIN)
                 );
     
                 response.addHeader("Set-Cookie", cookieDomain);

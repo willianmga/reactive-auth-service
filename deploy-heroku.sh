@@ -2,8 +2,8 @@
 
 ## Script for automating deployment of source code into Heroku
 
-export NEW_VERSION=$1
 export APPNAME="reactive-chat-auth-back"
+export USERNAME="willian.bodnariuc@gmail.com"
 
 # Package the jar and build the docker image
 
@@ -11,8 +11,6 @@ mvn clean package
 docker build -t $APPNAME:latest .
 
 # Deploys docker image to Heroku
-
-export USERNAME="willian.bodnariuc@gmail.com"
 
 heroku login --username $USERNAME
 export TOKEN=$(heroku auth:token)

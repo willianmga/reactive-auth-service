@@ -15,4 +15,4 @@ ENV CHAT_MONGO_CONNECTION_STRING=mongodb://%s:%s@%s/%s
 ENV CHAT_MONGO_DATABASE=socialchat
 ENV CHAT_MONGO_AUTH_DATABASE=admin
 
-CMD java -jar reactive-chat-auth-service.jar
+CMD java -jar reactive-chat-auth-service.jar --server.port=$PORT
