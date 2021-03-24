@@ -47,50 +47,44 @@ public class AuthenticationControllerImpl implements AuthenticationController {
         return authenticationService.authenticate(authenticateRequest)
             .flatMap(authenticateResponse -> {
 
-                final String cookieDomain = String.format(
-                    SET_COOKIE_FORMAT,
-                    authenticateResponse.getToken(),
-                    environment.getProperty(B_COOKIE_DOMAIN)
-                );
-    
-                response.addHeader(SET_COOKIE_HEADER_NAME, cookieDomain);
+                response.addHeader(SET_COOKIE_HEADER_NAME, createCookieHeader(authenticateResponse));
                 
                 LOGGER.info("User {} successfully logged in", authenticateRequest.getUsername());
     
                 return Mono.just(ResponseEntity
                         .ok(AuthenticateResponse.builder()
-                                .user(authenticateResponse.getUser())
-                                .status(authenticateResponse.getStatus())
-                                .build()
+                            .user(authenticateResponse.getUser())
+                            .status(authenticateResponse.getStatus())
+                            .build()
                         )
                     );
             })
             .onErrorResume((error) -> {
                 ChatException chatException = (ChatException) error;
+                HttpStatus httpStatus;
+                ResponseStatus responseStatus;
+                
                 if (chatException.getResponseStatus() == ResponseStatus.INVALID_CREDENTIALS) {
                     LOGGER.info("Failed to login user {} with invalid credentials", authenticateRequest.getUsername());
-                    return Mono.just(
-                        ResponseEntity
-                            .status(HttpStatus.UNAUTHORIZED)
-                            .body(AuthenticateResponse.builder()
-                                .status(ResponseStatus.INVALID_CREDENTIALS)
-                                .build()
-                            )
-                    );
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    responseStatus = ResponseStatus.INVALID_CREDENTIALS;
                 } else {
                     LOGGER.error("Server error: {}", error.getMessage());
-                    return Mono.just(
-                        ResponseEntity
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(AuthenticateResponse.builder()
-                                .status(ResponseStatus.SERVER_ERROR)
-                                .build()
-                            )
-                    );
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    responseStatus = ResponseStatus.SERVER_ERROR;
                 }
+    
+                return Mono.just(ResponseEntity
+                    .status(httpStatus)
+                    .body(AuthenticateResponse.builder()
+                        .status(responseStatus)
+                        .build()
+                    )
+                );
+                
             });
     }
-    
+
     @PostMapping
     @RequestMapping("/token/valid")
     public Mono<ResponseEntity<ValidateTokenServerResponse>> validateToken(@RequestHeader("Authorization") final String token) {
@@ -112,6 +106,13 @@ public class AuthenticationControllerImpl implements AuthenticationController {
                 }
             });
         
+    }
+    
+    private String createCookieHeader(final AuthenticateResponse authenticateResponse) {
+        return String.format(
+            SET_COOKIE_FORMAT, authenticateResponse.getToken(),
+            environment.getProperty(B_COOKIE_DOMAIN)
+        );
     }
     
     private ValidateTokenServerResponse error(final ChatException chatException) {
