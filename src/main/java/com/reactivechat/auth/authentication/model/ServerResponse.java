@@ -12,9 +12,16 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
-public class ErrorMessage {
+public class ServerResponse {
     
     private final String message;
     private final ResponseStatus status;
+    
+    public static ServerResponse success(final String message) {
+        return ServerResponse.builder()
+            .message(message)
+            .status(ResponseStatus.SUCCESS)
+            .build();
+    }
     
 }

@@ -270,7 +270,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
         return ResponseMessage
             .builder()
             .type(messageType)
-            .payload(exception.toErrorMessage())
+            .payload(exception.toServerResponse())
             .build();
         
     }

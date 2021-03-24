@@ -1,6 +1,6 @@
 package com.reactivechat.auth.exception;
 
-import com.reactivechat.auth.authentication.model.ErrorMessage;
+import com.reactivechat.auth.authentication.model.ServerResponse;
 import lombok.Getter;
 
 import static com.reactivechat.auth.exception.ResponseStatus.SERVER_ERROR;
@@ -21,13 +21,13 @@ public class ChatException extends RuntimeException {
         this.responseStatus = responseStatus;
     }
     
-    public ErrorMessage toErrorMessage() {
+    public ServerResponse toServerResponse() {
         
         final String errorMessage = (SERVER_ERROR.equals(responseStatus))
             ? SERVER_ERROR_MESSAGE
             : getMessage();
         
-        return ErrorMessage
+        return ServerResponse
             .builder()
             .status(responseStatus)
             .message(errorMessage)
