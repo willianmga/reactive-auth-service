@@ -2,12 +2,13 @@ FROM openjdk:8-jdk-alpine
 
 LABEL maintainer="willian.azevedo (willian-mga@hotmail.com)"
 
-ADD target/reactive-chat-auth-service.jar /opt/auth/reactive-chat-auth-service.jar
+ADD target/reactive-chat-auth-service.jar /opt/chat/reactive-chat-auth-service.jar
 
-WORKDIR /opt/auth
+WORKDIR /opt/chat
 
 EXPOSE 8080
 
+ENV PORT=8080
 ENV CHAT_MONGO_SERVER=localhost:27017
 ENV CHAT_MONGO_USERNAME=evitcaer
 ENV CHAT_MONGO_PASSWORD=johnjones
