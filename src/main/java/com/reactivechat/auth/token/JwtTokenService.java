@@ -4,7 +4,9 @@ import com.reactivechat.auth.authentication.model.ChatSession;
 import com.reactivechat.auth.exception.ChatException;
 import com.reactivechat.auth.secret.SecretKeyService;
 import com.reactivechat.auth.user.model.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.time.OffsetDateTime;
@@ -18,7 +20,7 @@ import static com.reactivechat.auth.exception.ResponseStatus.INVALID_CREDENTIALS
 public class JwtTokenService implements TokenService {
     
     private static final String AUTH_SERVICE = "auth";
-    private static final String SESSION_ID = "ses";
+    public static final String SESSION_ID = "ses";
     private static final String ALGORITHM = "alg";
     private static final long TOKEN_DURATION_IN_MINUTES = 5;
     
@@ -44,16 +46,15 @@ public class JwtTokenService implements TokenService {
     }
     
     @Override
-    public Boolean validate(final String token) {
+    public Jws<Claims> validate(final String token) {
         
         try {
             
-            Jwts.parserBuilder()
+            return Jwts.parserBuilder()
                 .setSigningKey(secretKeyService.getJwtSecretKey())
                 .build()
                 .parseClaimsJws(token);
             
-            return true;
         } catch (ExpiredJwtException e) {
             throw new ChatException("Token is expired", EXPIRED_TOKEN);
         } catch (Exception e) {

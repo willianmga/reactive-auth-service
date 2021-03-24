@@ -2,7 +2,7 @@ package com.reactivechat.auth.authentication;
 
 import com.reactivechat.auth.authentication.model.AuthenticateRequest;
 import com.reactivechat.auth.authentication.model.AuthenticateResponse;
-import com.reactivechat.auth.authentication.model.ServerResponse;
+import com.reactivechat.auth.authentication.model.ValidateTokenServerResponse;
 import com.reactivechat.auth.exception.ChatException;
 import com.reactivechat.auth.exception.ResponseStatus;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +31,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationControllerImpl.class);
     
     private final Environment environment;
-    private final AuthenticationServiceImpl authenticationService;
+    private final AuthenticationService authenticationService;
 
     @Autowired
     public AuthenticationControllerImpl(AuthenticationServiceImpl authenticationService,
@@ -93,25 +93,32 @@ public class AuthenticationControllerImpl implements AuthenticationController {
     
     @PostMapping
     @RequestMapping("/token/valid")
-    public Mono<ResponseEntity<ServerResponse>> validateToken(@RequestHeader("Authorization") final String token) {
+    public Mono<ResponseEntity<ValidateTokenServerResponse>> validateToken(@RequestHeader("Authorization") final String token) {
         
         return authenticationService.validate(token)
-            .flatMap((response) -> Mono.just(ResponseEntity.ok(ServerResponse.success("Token successfully validated"))))
+            .flatMap((response) -> Mono.just(ResponseEntity.ok(response)))
             .onErrorResume((error) -> {
                 ChatException chatException = (ChatException) error;
                 if (chatException.getResponseStatus() == ResponseStatus.EXPIRED_TOKEN) {
                     LOGGER.info("Failed to validate expired token");
                     return Mono.just(ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body(chatException.toServerResponse()));
+                        .body(error(chatException)));
                 } else {
                     LOGGER.error("Fail while validating compromised token");
                     return Mono.just(ResponseEntity
                         .status(HttpStatus.UNAUTHORIZED)
-                        .body(chatException.toServerResponse()));
+                        .body(error(chatException)));
                 }
             });
         
+    }
+    
+    private ValidateTokenServerResponse error(final ChatException chatException) {
+        return ValidateTokenServerResponse.builder()
+            .status(chatException.getResponseStatus())
+            .message(chatException.getMessage())
+            .build();
     }
 
 }

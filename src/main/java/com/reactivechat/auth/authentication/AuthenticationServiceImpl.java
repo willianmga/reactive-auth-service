@@ -1,15 +1,17 @@
 package com.reactivechat.auth.authentication;
 
-import com.reactivechat.auth.session.SessionRepository;
 import com.reactivechat.auth.authentication.model.AuthenticateRequest;
 import com.reactivechat.auth.authentication.model.AuthenticateResponse;
 import com.reactivechat.auth.authentication.model.ChatSession;
+import com.reactivechat.auth.authentication.model.ValidateTokenServerResponse;
 import com.reactivechat.auth.exception.ChatException;
 import com.reactivechat.auth.exception.ResponseStatus;
+import com.reactivechat.auth.session.SessionRepository;
 import com.reactivechat.auth.token.TokenService;
 import com.reactivechat.auth.user.UserRepository;
 import com.reactivechat.auth.user.model.User;
 import com.reactivechat.auth.user.model.UserDTO;
+import io.jsonwebtoken.Claims;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import static com.reactivechat.auth.authentication.model.ChatSession.Status.AUTHENTICATED;
 import static com.reactivechat.auth.exception.ResponseStatus.INVALID_CREDENTIALS;
+import static com.reactivechat.auth.token.JwtTokenService.SESSION_ID;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -74,17 +77,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         sink.error(new ChatException("Failed to authenticate. Reason: " + e.getMessage(), ResponseStatus.SERVER_ERROR));
                     }
         
+                } else {
+                    sink.error(new ChatException("Invalid Credentials", INVALID_CREDENTIALS));
                 }
              
-                sink.error(new ChatException("Invalid Credentials", INVALID_CREDENTIALS));
-                
             });
     
     }
     
     @Override
-    public Mono<Boolean> validate(final String token) {
-        return Mono.fromCallable(() -> tokenService.validate(token));
+    public Mono<ValidateTokenServerResponse> validate(final String token) {
+        return Mono.fromCallable(() -> {
+            
+            final Claims claims = tokenService.validate(token).getBody();
+            
+            return ValidateTokenServerResponse.builder()
+                .sessionId(claims.get(SESSION_ID, String.class))
+                .userId(claims.getSubject())
+                .status(ResponseStatus.SUCCESS)
+                .message("Token successfully validated")
+                .build();
+            
+        });
     }
     
     private UserDTO mapToUserDTO(final User user) {
