@@ -10,6 +10,20 @@ Authentication Service of SocialChat
 * Front End: https://github.com/willianmga/social-chat-front
 * Chat Server: https://github.com/willianmga/social-chat-service
 
+## Features
+* Authentication
+* Logoff
+* JWT Token Validation
+
+## Technologies
+* Spring WebFlux and Spring Boot
+* Jetty WebSocket Server
+* MongoDB Database
+* Docker and Docker compose
+* Deployment to AWS and Heroku
+* Java 8
+* Maven
+
 ## Endpoints
 * ```POST /v1/auth``` : Authenticates a user and creates a session
 * ```POST /v1/auth/logoff``` : Invalidates a previously created session
