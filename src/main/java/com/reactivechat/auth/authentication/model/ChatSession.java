@@ -39,15 +39,7 @@ public class ChatSession {
         this.status = status;
         this.type = type;
     }
-    
-    @BsonIgnore
-    public boolean isAuthenticated() {
-        return Status.AUTHENTICATED.equals(status) &&
-            userAuthenticationDetails != null &&
-            userAuthenticationDetails.getUserId() != null &&
-            !userAuthenticationDetails.getUserId().isEmpty();
-    }
-    
+
     @BsonIgnore
     public ChatSessionBuilder from() {
         return ChatSession.builder()
@@ -78,7 +70,7 @@ public class ChatSession {
     }
     
     public enum Status {
-        NOT_AUTHENTICATED, AUTHENTICATED, LOGGED_OFF
+        AUTHENTICATED, LOGGED_OFF
     }
     
     public enum Type {

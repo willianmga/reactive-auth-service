@@ -18,5 +18,6 @@ public class AuthenticateResponse {
     private final String token;
     private final UserDTO user;
     private final ResponseStatus status;
+    private final String tokenExpireDate;
     
 }

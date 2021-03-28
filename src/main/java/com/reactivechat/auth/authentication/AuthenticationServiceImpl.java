@@ -3,17 +3,21 @@ package com.reactivechat.auth.authentication;
 import com.reactivechat.auth.authentication.model.AuthenticateRequest;
 import com.reactivechat.auth.authentication.model.AuthenticateResponse;
 import com.reactivechat.auth.authentication.model.ChatSession;
+import com.reactivechat.auth.authentication.model.ServerResponse;
 import com.reactivechat.auth.authentication.model.ValidateTokenServerResponse;
 import com.reactivechat.auth.exception.ChatException;
 import com.reactivechat.auth.exception.ResponseStatus;
 import com.reactivechat.auth.session.SessionRepository;
 import com.reactivechat.auth.token.TokenService;
+import com.reactivechat.auth.token.model.CreateTokenResponse;
 import com.reactivechat.auth.user.UserRepository;
 import com.reactivechat.auth.user.model.User;
 import com.reactivechat.auth.user.model.UserDTO;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.assertj.core.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,15 +64,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             .status(AUTHENTICATED)
                             .build();
             
-                        final String token = tokenService.create(newSession, user);
-                        sessionRepository.authenticate(newSession, user, token);
+                        final CreateTokenResponse createTokenResponse = tokenService.create(newSession, user);
+                        sessionRepository.authenticate(newSession, user, createTokenResponse.getToken());
             
                         LOGGER.info("New session authenticated: {}", newSession.getId());
             
                         sink.next(
                             AuthenticateResponse.builder()
                                 .user(mapToUserDTO(user))
-                                .token(token)
+                                .token(createTokenResponse.getToken())
+                                .tokenExpireDate(createTokenResponse.getTokenExpireDate().toString())
                                 .status(ResponseStatus.SUCCESS)
                                 .build()
                         );
@@ -99,6 +104,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
             
         });
+    }
+    
+    @Override
+    public Mono<ServerResponse> logoff(final String token) {
+        return Mono.fromCallable(() -> tokenService.parse(token))
+            .flatMap(claims -> Mono.just(claims.getBody().get(SESSION_ID, String.class)))
+            .onErrorResume(this::getSessionId)
+            .flatMap(sessionId -> (!Strings.isNullOrEmpty(sessionId))
+                ? sessionRepository.logoff(sessionId)
+                : Mono.just(Boolean.FALSE)
+            )
+            .flatMap(sessionUpdated -> (sessionUpdated)
+                ? Mono.just(ServerResponse.success("Session successfully invalidated"))
+                : Mono.just(ServerResponse.success("No sessions to invalidate"))
+            );
+    }
+    
+    private Mono<String> getSessionId(Throwable error) {
+        if (error instanceof ExpiredJwtException) {
+            ExpiredJwtException expiredJwtException = (ExpiredJwtException) error;
+            return Mono.just(expiredJwtException.getClaims().get(SESSION_ID, String.class));
+        }
+        LOGGER.error("Failed to invalidate session because token is not valid");
+        return Mono.just("");
     }
     
     private UserDTO mapToUserDTO(final User user) {

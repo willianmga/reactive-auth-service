@@ -2,9 +2,11 @@ package com.reactivechat.auth.authentication;
 
 import com.reactivechat.auth.authentication.model.AuthenticateRequest;
 import com.reactivechat.auth.authentication.model.AuthenticateResponse;
+import com.reactivechat.auth.authentication.model.ServerResponse;
 import com.reactivechat.auth.authentication.model.ValidateTokenServerResponse;
 import com.reactivechat.auth.exception.ChatException;
 import com.reactivechat.auth.exception.ResponseStatus;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,9 +28,11 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/v1/auth")
 public class AuthenticationControllerImpl implements AuthenticationController {
     
+    private static final String B_COOKIE_NAME = "b";
     private static final String B_COOKIE_DOMAIN = "b.cookie.domain";
     private static final String SET_COOKIE_HEADER_NAME = "Set-Cookie";
-    private static final String SET_COOKIE_FORMAT = "b=%s; Path=/; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
+    private static final String SET_COOKIE_FORMAT = B_COOKIE_NAME + "=%s; Path=/; Expires=%s; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
+    private static final String B_COOKIE_REVOKED_FORMAT = B_COOKIE_NAME + "=; Path=/; Max-Age=0; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationControllerImpl.class);
     
     private final Environment environment;
@@ -47,7 +52,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
         return authenticationService.authenticate(authenticateRequest)
             .flatMap(authenticateResponse -> {
 
-                response.addHeader(SET_COOKIE_HEADER_NAME, createCookieHeader(authenticateResponse));
+                response.addHeader(SET_COOKIE_HEADER_NAME, createBCookie(authenticateResponse));
                 
                 LOGGER.info("User {} successfully logged in", authenticateRequest.getUsername());
     
@@ -55,6 +60,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
                         .ok(AuthenticateResponse.builder()
                             .user(authenticateResponse.getUser())
                             .status(authenticateResponse.getStatus())
+                            .tokenExpireDate(authenticateResponse.getTokenExpireDate())
                             .build()
                         )
                     );
@@ -86,6 +92,17 @@ public class AuthenticationControllerImpl implements AuthenticationController {
     }
 
     @PostMapping
+    @RequestMapping("/logoff")
+    public Mono<ServerResponse> logOff(@CookieValue(name = B_COOKIE_NAME) Cookie bCookie,
+                                       HttpServletResponse servletResponse) {
+        return authenticationService.logoff(bCookie.getValue())
+            .flatMap(response -> {
+                servletResponse.addHeader(SET_COOKIE_HEADER_NAME, revokeBCookie());
+                return Mono.just(response);
+            });
+    }
+    
+    @PostMapping
     @RequestMapping("/token/valid")
     public Mono<ResponseEntity<ValidateTokenServerResponse>> validateToken(@RequestHeader("Authorization") final String token) {
         
@@ -108,9 +125,18 @@ public class AuthenticationControllerImpl implements AuthenticationController {
         
     }
     
-    private String createCookieHeader(final AuthenticateResponse authenticateResponse) {
+    private String createBCookie(final AuthenticateResponse authenticateResponse) {
         return String.format(
-            SET_COOKIE_FORMAT, authenticateResponse.getToken(),
+            SET_COOKIE_FORMAT,
+            authenticateResponse.getToken(),
+            authenticateResponse.getTokenExpireDate(),
+            environment.getProperty(B_COOKIE_DOMAIN)
+        );
+    }
+    
+    private String revokeBCookie() {
+        return String.format(
+            B_COOKIE_REVOKED_FORMAT,
             environment.getProperty(B_COOKIE_DOMAIN)
         );
     }

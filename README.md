@@ -1,5 +1,10 @@
 # reactive-chat-auth-service
 
+## Endpoints
+
+* ```/v1/auth``` : Authenticates a user and creates a session
+* ```/v1/auth/logoff``` : Invalidates a previously created session
+* ```/v1/auth/token/valid``` : Validates a JWT token confirming whether a session is valid or not.
 
 ## Environment Variables Accepted
 
