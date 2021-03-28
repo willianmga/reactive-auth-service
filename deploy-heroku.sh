@@ -3,7 +3,7 @@
 ## Script for automating deployment of source code into Heroku
 
 export DOCKER_HUB_REPO="willianmga"
-export APPNAME="reactive-chat-auth-service"
+export APPNAME="social-chat-auth-service"
 
 export DOCKER_HUB_USERNAME="willianmga"
 export USERNAME="willian.bodnariuc@gmail.com"

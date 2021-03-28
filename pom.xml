@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>reactive-chat-auth-service</artifactId>
-    <groupId>reactive-chat</groupId>
+    <artifactId>social-chat-auth-service</artifactId>
+    <groupId>social-chat</groupId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>reactive-chat-auth-service</name>
+    <name>social-chat-auth-service</name>
     <packaging>jar</packaging>
 
     <parent>
@@ -74,7 +74,7 @@
     </dependencies>
 
     <build>
-        <finalName>reactive-chat-auth-service</finalName>
+        <finalName>social-chat-auth-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

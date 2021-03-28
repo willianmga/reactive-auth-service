@@ -1,4 +1,4 @@
-# reactive-chat-auth-service
+# social-chat-auth-service
 
 ## Endpoints
 

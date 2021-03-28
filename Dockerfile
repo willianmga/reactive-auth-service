@@ -2,9 +2,9 @@ FROM openjdk:8-jdk-alpine
 
 LABEL maintainer="willian.azevedo (willian-mga@hotmail.com)"
 
-ADD target/reactive-chat-auth-service.jar /opt/chat/reactive-chat-auth-service.jar
+ADD target/social-chat-auth-service.jar /opt/socialchat/social-chat-auth-service.jar
 
-WORKDIR /opt/chat
+WORKDIR /opt/socialchat
 
 EXPOSE 8080
 
@@ -15,7 +15,8 @@ ENV CHAT_MONGO_PASSWORD=johnjones
 ENV CHAT_MONGO_CONNECTION_STRING=mongodb://%s:%s@%s/%s
 ENV CHAT_MONGO_DATABASE=socialchat
 ENV CHAT_MONGO_AUTH_DATABASE=admin
+ENV JWT_SECRET_KEY=asdf
 
-CMD java -jar reactive-chat-auth-service.jar \
+CMD java -jar social-chat-auth-service.jar \
 --spring.profiles.active=prod \
 --server.port=$PORT
