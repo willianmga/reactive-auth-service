@@ -3,6 +3,7 @@
 Authentication Service of SocialChat
 
 ## Links
+* Chat: www.socialchat.live
 * Live instance: https://www.socialchat.live/api
 * Docker image registry: https://hub.docker.com/r/willianmga/social-chat-auth-service
 
