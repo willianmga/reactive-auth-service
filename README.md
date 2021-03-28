@@ -19,6 +19,7 @@ Authentication Service of SocialChat
 ## Technologies
 * Spring WebFlux and Spring Boot
 * Jetty WebSocket Server
+* JWT Tokens
 * MongoDB Database
 * Docker and Docker compose
 * Deployment to AWS and Heroku
