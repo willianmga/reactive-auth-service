@@ -50,16 +50,8 @@ public class MongoSessionRepository implements SessionRepository {
                 throw new ChatException("Failed to authenticate session: Token is already in use by another session");
             });
     
-        final UserAuthenticationDetails userAuthenticationDetails = UserAuthenticationDetails.builder()
-            .userId(user.getId())
-            .token(token)
-            .build();
-    
-        final ChatSession newAuthenticatedSession = chatSession.from()
-            .userAuthenticationDetails(userAuthenticationDetails)
-            .build();
-    
-        Mono.from(mongoCollection.insertOne(newAuthenticatedSession))
+        Mono.just(buildAuthenticatedSession(chatSession, user, token))
+            .flatMap(newChatSession -> Mono.from(mongoCollection.insertOne(newChatSession)))
             .doOnSuccess(result -> LOGGER.info("Inserted new session {}", result.getInsertedId()))
             .subscribe();
         
