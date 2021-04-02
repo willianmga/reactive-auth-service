@@ -1,8 +1,13 @@
 package live.socialchat.auth.authentication;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import live.socialchat.auth.authentication.model.AuthenticateRequest;
 import live.socialchat.auth.authentication.model.AuthenticateResponse;
 import live.socialchat.auth.authentication.model.ChatSession;
+import live.socialchat.auth.authentication.model.ChatSession.Status;
 import live.socialchat.auth.authentication.model.ServerResponse;
 import live.socialchat.auth.authentication.model.ValidateTokenServerResponse;
 import live.socialchat.auth.exception.ChatException;
@@ -13,11 +18,6 @@ import live.socialchat.auth.token.model.CreateTokenResponse;
 import live.socialchat.auth.user.UserRepository;
 import live.socialchat.auth.user.model.User;
 import live.socialchat.auth.user.model.UserDTO;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import java.time.OffsetDateTime;
-import java.util.UUID;
-import live.socialchat.auth.authentication.model.ChatSession.Status;
 import org.assertj.core.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
