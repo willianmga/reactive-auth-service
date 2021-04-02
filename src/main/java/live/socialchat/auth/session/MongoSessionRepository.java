@@ -52,23 +52,12 @@ public class MongoSessionRepository implements SessionRepository {
     
         Mono.just(buildAuthenticatedSession(chatSession, user, token))
             .flatMap(newChatSession -> Mono.from(mongoCollection.insertOne(newChatSession)))
+            .doOnError(error -> LOGGER.error("Failed to insert session to db {}. Reason: {}", chatSession.getId(), error.getMessage()))
             .doOnSuccess(result -> LOGGER.info("Inserted new session {}", result.getInsertedId()))
             .subscribe();
         
     }
-    
-    private ChatSession buildAuthenticatedSession(ChatSession chatSession,
-                                                  User user,
-                                                  String token) {
-        return chatSession.from()
-            .userAuthenticationDetails(UserAuthenticationDetails.builder()
-                .userId(user.getId())
-                .token(token)
-                .build()
-            )
-            .build();
-    }
-    
+
     @Override
     public Mono<Boolean> logoff(final String sessionId) {
         return Mono.from(
@@ -94,6 +83,16 @@ public class MongoSessionRepository implements SessionRepository {
                 .projection(SERVER_SEARCH_FIELDS)
                 .first()
         );
+    }
+    
+    private ChatSession buildAuthenticatedSession(final ChatSession chatSession, final User user, final String token) {
+        return chatSession.from()
+            .userAuthenticationDetails(UserAuthenticationDetails.builder()
+                .userId(user.getId())
+                .token(token)
+                .build()
+            )
+            .build();
     }
     
 }
