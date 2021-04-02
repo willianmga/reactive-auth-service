@@ -56,15 +56,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 if (user.getPassword().equals(authenticateRequest.getPassword())) {
         
                     try {
-            
+
+                        final String sessionId = UUID.randomUUID().toString();
+                        final CreateTokenResponse createTokenResponse = tokenService.create(sessionId, user);
+    
                         final ChatSession newSession = ChatSession.builder()
-                            .id(UUID.randomUUID().toString())
+                            .id(sessionId)
                             .userDeviceDetails(authenticateRequest.getUserDeviceDetails())
                             .startDate(OffsetDateTime.now().toString())
+                            .expiryDate(createTokenResponse.getTokenExpireDate().toString())
                             .status(Status.AUTHENTICATED)
                             .build();
-            
-                        final CreateTokenResponse createTokenResponse = tokenService.create(newSession, user);
+                        
                         sessionRepository.authenticate(newSession, user, createTokenResponse.getToken());
             
                         LOGGER.info("New session authenticated: {}", newSession.getId());

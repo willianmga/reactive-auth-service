@@ -20,8 +20,8 @@ public class ChatSession {
     private final UserDeviceDetails userDeviceDetails;
     private final UserAuthenticationDetails userAuthenticationDetails;
     private final String startDate;
+    private final String expiryDate;
     private final Status status;
-    private final Type type;
     
     @BsonCreator
     public ChatSession(@BsonProperty("id") String id,
@@ -29,15 +29,15 @@ public class ChatSession {
                        @BsonProperty("userDeviceDetails") UserDeviceDetails userDeviceDetails,
                        @BsonProperty("userAuthenticationDetails") UserAuthenticationDetails userAuthenticationDetails,
                        @BsonProperty("startDate") String startDate,
-                       @BsonProperty("status") Status status,
-                       @BsonProperty("type") Type type) {
+                       @BsonProperty("expiryDate") String expiryDate,
+                       @BsonProperty("status") Status status) {
         this.id = id;
         this.serverDetails = serverDetails;
         this.userDeviceDetails = userDeviceDetails;
         this.userAuthenticationDetails = userAuthenticationDetails;
         this.startDate = startDate;
+        this.expiryDate = expiryDate;
         this.status = status;
-        this.type = type;
     }
 
     @BsonIgnore
@@ -48,8 +48,8 @@ public class ChatSession {
             .userAuthenticationDetails(userAuthenticationDetails)
             .serverDetails(serverDetails)
             .startDate(startDate)
-            .status(status)
-            .type(type);
+            .expiryDate(expiryDate)
+            .status(status);
     }
     
     @Override
@@ -71,10 +71,6 @@ public class ChatSession {
     
     public enum Status {
         AUTHENTICATED, LOGGED_OFF
-    }
-    
-    public enum Type {
-        AUTHENTICATE, REAUTHENTICATE
     }
     
 }

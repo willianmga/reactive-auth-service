@@ -1,10 +1,5 @@
 package live.socialchat.auth.token;
 
-import live.socialchat.auth.authentication.model.ChatSession;
-import live.socialchat.auth.exception.ChatException;
-import live.socialchat.auth.secret.SecretKeyService;
-import live.socialchat.auth.token.model.CreateTokenResponse;
-import live.socialchat.auth.user.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -12,7 +7,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.time.OffsetDateTime;
 import java.util.Date;
+import live.socialchat.auth.exception.ChatException;
 import live.socialchat.auth.exception.ResponseStatus;
+import live.socialchat.auth.secret.SecretKeyService;
+import live.socialchat.auth.token.model.CreateTokenResponse;
+import live.socialchat.auth.user.model.User;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,7 +29,7 @@ public class JwtTokenService implements TokenService {
     }
     
     @Override
-    public CreateTokenResponse create(final ChatSession session,
+    public CreateTokenResponse create(final String sessionId,
                                       final User user) {
     
         final OffsetDateTime tokenExpireDate = OffsetDateTime.now()
@@ -40,7 +39,7 @@ public class JwtTokenService implements TokenService {
             .setHeaderParam(ALGORITHM, SignatureAlgorithm.HS512.getJcaName())
             .setIssuer(AUTH_SERVICE)
             .setSubject(user.getId())
-            .claim(SESSION_ID, session.getId())
+            .claim(SESSION_ID, sessionId)
             .setIssuedAt(Date.from(OffsetDateTime.now().toInstant()))
             .setExpiration(Date.from(tokenExpireDate.toInstant()))
             .signWith(secretKeyService.getJwtSecretKey())
