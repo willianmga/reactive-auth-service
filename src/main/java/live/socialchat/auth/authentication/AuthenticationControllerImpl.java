@@ -1,17 +1,17 @@
 package live.socialchat.auth.authentication;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import live.socialchat.auth.authentication.model.AuthenticateRequest;
 import live.socialchat.auth.authentication.model.AuthenticateResponse;
 import live.socialchat.auth.authentication.model.ServerResponse;
 import live.socialchat.auth.authentication.model.ValidateTokenServerResponse;
+import live.socialchat.auth.cookie.CookieService;
 import live.socialchat.auth.exception.ChatException;
 import live.socialchat.auth.exception.ResponseStatus;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -23,26 +23,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import static live.socialchat.auth.cookie.CookieServiceImpl.B_COOKIE_NAME;
+import static live.socialchat.auth.cookie.CookieServiceImpl.SET_COOKIE_HEADER_NAME;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/v1/auth")
 public class AuthenticationControllerImpl implements AuthenticationController {
-    
-    private static final String B_COOKIE_NAME = "b";
-    private static final String B_COOKIE_DOMAIN = "b.cookie.domain";
-    private static final String SET_COOKIE_HEADER_NAME = "Set-Cookie";
-    private static final String SET_COOKIE_FORMAT = B_COOKIE_NAME + "=%s; Path=/; Expires=%s; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
-    private static final String B_COOKIE_REVOKED_FORMAT = B_COOKIE_NAME + "=; Path=/; Max-Age=0; Domain=%s; SameSite=Strict; Secure; HttpOnly;";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationControllerImpl.class);
     
-    private final Environment environment;
     private final AuthenticationService authenticationService;
+    private final CookieService cookieService;
 
     @Autowired
-    public AuthenticationControllerImpl(AuthenticationServiceImpl authenticationService,
-                                        Environment environment) {
+    public AuthenticationControllerImpl(final AuthenticationServiceImpl authenticationService,
+                                        final CookieService cookieService) {
         this.authenticationService = authenticationService;
-        this.environment = environment;
+        this.cookieService = cookieService;
     }
 
     @PostMapping
@@ -52,7 +50,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
         return authenticationService.authenticate(authenticateRequest)
             .flatMap(authenticateResponse -> {
 
-                response.addHeader(SET_COOKIE_HEADER_NAME, createBCookie(authenticateResponse));
+                response.addHeader(SET_COOKIE_HEADER_NAME, cookieService.createBCookie(authenticateResponse));
                 
                 LOGGER.info("User {} successfully logged in", authenticateRequest.getUsername());
     
@@ -97,7 +95,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
                                        HttpServletResponse servletResponse) {
         return authenticationService.logoff(bCookie.getValue())
             .flatMap(response -> {
-                servletResponse.addHeader(SET_COOKIE_HEADER_NAME, revokeBCookie());
+                servletResponse.addHeader(SET_COOKIE_HEADER_NAME, cookieService.revokeBCookie());
                 return Mono.just(response);
             });
     }
@@ -123,22 +121,6 @@ public class AuthenticationControllerImpl implements AuthenticationController {
                 }
             });
         
-    }
-    
-    private String createBCookie(final AuthenticateResponse authenticateResponse) {
-        return String.format(
-            SET_COOKIE_FORMAT,
-            authenticateResponse.getToken(),
-            authenticateResponse.getTokenExpireDate(),
-            environment.getProperty(B_COOKIE_DOMAIN)
-        );
-    }
-    
-    private String revokeBCookie() {
-        return String.format(
-            B_COOKIE_REVOKED_FORMAT,
-            environment.getProperty(B_COOKIE_DOMAIN)
-        );
     }
     
     private ValidateTokenServerResponse error(final ChatException chatException) {

@@ -47,7 +47,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
     
     @Override
-    public Mono<AuthenticateResponse> authenticate(AuthenticateRequest authenticateRequest) {
+    public Mono<AuthenticateResponse> authenticate(final AuthenticateRequest authenticateRequest) {
     
         return userRepository.findFullDetailsByUsername(authenticateRequest.getUsername())
             .switchIfEmpty(Mono.error(new ChatException("Invalid Credentials", INVALID_CREDENTIALS)))
