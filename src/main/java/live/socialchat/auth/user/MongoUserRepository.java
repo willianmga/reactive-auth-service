@@ -3,8 +3,8 @@ package live.socialchat.auth.user;
 import com.mongodb.client.model.Filters;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import com.mongodb.reactivestreams.client.MongoDatabase;
-import live.socialchat.auth.exception.ChatException;
-import live.socialchat.auth.exception.ResponseStatus;
+import live.socialchat.auth.exception.RequestValidationException;
+import live.socialchat.auth.exception.RequestValidationException.ValidationType;
 import live.socialchat.auth.user.model.DestinationType;
 import live.socialchat.auth.user.model.User;
 import org.bson.conversions.Bson;
@@ -45,7 +45,7 @@ public class MongoUserRepository implements UserRepository {
         usernameExists(user.getUsername())
             .blockOptional()
             .ifPresent((result) -> {
-                throw new ChatException("username already taken", ResponseStatus.USERNAME_IN_USE);
+                throw new RequestValidationException( "username already taken", ValidationType.USERNAME_IN_USE);
             });
 
         return Mono.from(mongoCollection.insertOne(user))
