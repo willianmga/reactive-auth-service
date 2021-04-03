@@ -12,6 +12,7 @@ import live.socialchat.auth.authentication.model.ServerResponse;
 import live.socialchat.auth.authentication.model.ValidateTokenServerResponse;
 import live.socialchat.auth.exception.ChatException;
 import live.socialchat.auth.exception.ResponseStatus;
+import live.socialchat.auth.secret.HashingService;
 import live.socialchat.auth.session.SessionRepository;
 import live.socialchat.auth.token.TokenService;
 import live.socialchat.auth.token.model.CreateTokenResponse;
@@ -34,26 +35,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final Logger LOGGER = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     
     private final TokenService tokenService;
+    private final HashingService hashingService;
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
     
     @Autowired
-    public AuthenticationServiceImpl(TokenService tokenService,
-                                     UserRepository userRepository,
-                                     SessionRepository sessionRepository) {
+    public AuthenticationServiceImpl(final TokenService tokenService,
+                                     final HashingService hashingService,
+                                     final UserRepository userRepository,
+                                     final SessionRepository sessionRepository) {
         this.tokenService = tokenService;
+        this.hashingService = hashingService;
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
     }
     
     @Override
-    public Mono<AuthenticateResponse> authenticate(AuthenticateRequest authenticateRequest) {
+    public Mono<AuthenticateResponse> authenticate(final AuthenticateRequest authenticateRequest) {
     
         return userRepository.findFullDetailsByUsername(authenticateRequest.getUsername())
             .switchIfEmpty(Mono.error(new ChatException("Invalid Credentials", INVALID_CREDENTIALS)))
             .handle((user, sink) -> {
     
-                if (user.getPassword().equals(authenticateRequest.getPassword())) {
+                if (hashingService.matches(authenticateRequest.getPassword(), user.getPassword())) {
         
                     try {
 

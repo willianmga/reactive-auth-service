@@ -1,4 +1,4 @@
-package live.socialchat.auth.authentication.model;
+package live.socialchat.auth.signup.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +11,10 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
-public class ReauthenticateRequest {
+public class SignupRequest {
     
-    private final String token;
+    private final String username;
+    private final String password;
+    private final String name;
     
 }

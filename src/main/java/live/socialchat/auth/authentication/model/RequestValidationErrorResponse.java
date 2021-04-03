@@ -1,5 +1,7 @@
 package live.socialchat.auth.authentication.model;
 
+import java.util.List;
+import live.socialchat.auth.exception.RequestValidationException.ValidationError;
 import live.socialchat.auth.exception.ResponseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,16 +14,10 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
-public class SuccessMessage {
+public class RequestValidationErrorResponse {
     
     private final String message;
     private final ResponseStatus status;
-    
-    public static SuccessMessage create(final String message) {
-        return SuccessMessage.builder()
-            .message(message)
-            .status(ResponseStatus.SUCCESS)
-            .build();
-    }
-    
+    private final List<ValidationError> errors;
+
 }
