@@ -7,6 +7,7 @@ import live.socialchat.auth.authentication.model.AuthenticateRequest;
 import live.socialchat.auth.authentication.model.AuthenticateResponse;
 import live.socialchat.auth.avatar.AvatarService;
 import live.socialchat.auth.exception.ChatException;
+import live.socialchat.auth.signup.model.SignupRequest;
 import live.socialchat.auth.user.UserRepository;
 import live.socialchat.auth.user.model.Contact.ContactType;
 import live.socialchat.auth.user.model.User;

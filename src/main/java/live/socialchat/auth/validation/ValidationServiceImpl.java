@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import live.socialchat.auth.exception.RequestValidationException;
 import live.socialchat.auth.exception.RequestValidationException.ValidationError;
-import live.socialchat.auth.signup.SignupRequest;
+import live.socialchat.auth.signup.model.SignupRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;

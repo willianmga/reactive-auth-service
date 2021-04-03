@@ -3,6 +3,7 @@ package live.socialchat.auth.signup;
 import javax.servlet.http.HttpServletResponse;
 import live.socialchat.auth.authentication.model.AuthenticateResponse;
 import live.socialchat.auth.cookie.CookieService;
+import live.socialchat.auth.signup.model.SignupRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
