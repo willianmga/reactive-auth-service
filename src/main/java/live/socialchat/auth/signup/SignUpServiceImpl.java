@@ -7,6 +7,7 @@ import live.socialchat.auth.authentication.model.AuthenticateRequest;
 import live.socialchat.auth.authentication.model.AuthenticateResponse;
 import live.socialchat.auth.avatar.AvatarService;
 import live.socialchat.auth.exception.ChatException;
+import live.socialchat.auth.secret.HashingService;
 import live.socialchat.auth.signup.model.SignupRequest;
 import live.socialchat.auth.user.UserRepository;
 import live.socialchat.auth.user.model.Contact.ContactType;
@@ -26,16 +27,19 @@ public class SignUpServiceImpl implements SignUpService {
     
     private final AuthenticationService authenticationService;
     private final AvatarService avatarService;
+    private final HashingService hashingService;
     private final ValidationService validationService;
     private final UserRepository userRepository;
     
     @Autowired
     public SignUpServiceImpl(final AuthenticationService authenticationService,
                              final AvatarService avatarService,
+                             final HashingService hashingService,
                              final ValidationService validationService,
                              final UserRepository userRepository) {
         this.authenticationService = authenticationService;
         this.avatarService = avatarService;
+        this.hashingService = hashingService;
         this.validationService = validationService;
         this.userRepository = userRepository;
     }
@@ -48,29 +52,33 @@ public class SignUpServiceImpl implements SignUpService {
         return Mono.just(mapNewToUser(signupRequest))
             .flatMap(userRepository::create)
             .switchIfEmpty(Mono.error(new ChatException("Failed to create User", SERVER_ERROR)))
-            .flatMap(this::mapToAutenticateRequest)
+            .flatMap(user -> mapToAutenticateRequest(user, signupRequest.getPassword()))
             .flatMap(authenticationService::authenticate)
             .switchIfEmpty(Mono.error(new ChatException("Failed to authenticate User", AUTHENTICATION_ERROR)));
     }
     
-    private Mono<AuthenticateRequest> mapToAutenticateRequest(final User user) {
-        return Mono.just(AuthenticateRequest.builder()
-            .username(user.getUsername())
-            .password(user.getPassword())
-            .build());
-    }
-    
     private User mapNewToUser(final SignupRequest signupRequest) {
+        
+        final String hashedPassword = hashingService.hash(signupRequest.getPassword());
+        
         return User.builder()
             .id(UUID.randomUUID().toString())
             .username(signupRequest.getUsername().toLowerCase())
-            .password(signupRequest.getPassword())
+            .password(hashedPassword)
             .name(signupRequest.getName())
             .avatar(avatarService.pickRandomAvatar())
             .description(DEFAULT_DESCRIPTION)
             .contactType(ContactType.USER)
             .createdDate(OffsetDateTime.now().toString())
             .build();
+    }
+    
+    private Mono<AuthenticateRequest> mapToAutenticateRequest(final User user,
+                                                              final String password) {
+        return Mono.just(AuthenticateRequest.builder()
+            .username(user.getUsername())
+            .password(password)
+            .build());
     }
     
 }
