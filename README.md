@@ -15,13 +15,15 @@ Authentication Service of SocialChat
 * Authentication
 * Logoff
 * JWT Token Validation
+* Signup
 
 ## Technologies
 * Spring WebFlux and Spring Boot
-* JWT Tokens
 * MongoDB Database
 * Docker and Docker compose
 * Deployment to AWS and Heroku
+* JWT Tokens
+* BCrypt hashes
 * Java 8
 * Maven
 
@@ -29,6 +31,7 @@ Authentication Service of SocialChat
 * ```POST /v1/auth``` : Authenticates a user and creates a session
 * ```POST /v1/auth/logoff``` : Invalidates a previously created session
 * ```POST /v1/auth/token/valid``` : Validates a JWT token confirming whether a session is valid or not.
+* ```POST /v1/signup``` : Registers and authenticates a new user 
 
 ## Environment Variables Accepted
 * CHAT_MONGO_SERVER

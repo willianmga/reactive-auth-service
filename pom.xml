@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>social-chat-auth-service</artifactId>
     <groupId>social-chat</groupId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>social-chat-auth-service</name>
     <packaging>jar</packaging>
 
