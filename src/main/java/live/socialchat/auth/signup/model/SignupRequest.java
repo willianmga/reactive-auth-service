@@ -12,7 +12,8 @@ import lombok.ToString;
 @EqualsAndHashCode
 @AllArgsConstructor
 public class SignupRequest {
-    
+
+    private final String email;
     private final String username;
     private final String password;
     private final String name;

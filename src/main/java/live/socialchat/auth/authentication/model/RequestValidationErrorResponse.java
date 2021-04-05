@@ -1,6 +1,6 @@
 package live.socialchat.auth.authentication.model;
 
-import java.util.List;
+import java.util.Set;
 import live.socialchat.auth.exception.RequestValidationException.ValidationError;
 import live.socialchat.auth.exception.ResponseStatus;
 import lombok.AllArgsConstructor;
@@ -18,6 +18,6 @@ public class RequestValidationErrorResponse {
     
     private final String message;
     private final ResponseStatus status;
-    private final List<ValidationError> errors;
+    private final Set<ValidationError> errors;
 
 }

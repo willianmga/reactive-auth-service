@@ -17,31 +17,37 @@ public class User implements Contact {
     @BsonId
     private final String id;
     private final String username;
+    private final String email;
     private final String password;
     private final String name;
     private final String avatar;
     private final String description;
     private final ContactType contactType;
     private final String createdDate;
+    private final Status status;
     
     @BsonCreator
     public User(@BsonProperty("id") String id,
                 @BsonProperty("username") String username,
+                @BsonProperty("email") String email,
                 @BsonProperty("password") String password,
                 @BsonProperty("name") String name,
                 @BsonProperty("avatar") String avatar,
                 @BsonProperty("description") String description,
                 @BsonProperty("contactType") ContactType contactType,
-                @BsonProperty("createdDate") String createdDate) {
+                @BsonProperty("createdDate") String createdDate,
+                @BsonProperty("status") Status status) {
         
         this.id = id;
         this.username = username;
+        this.email = email;
         this.password = password;
         this.name = name;
         this.avatar = avatar;
         this.description = description;
         this.contactType = contactType;
         this.createdDate = createdDate;
+        this.status = status;
     }
     
     @BsonIgnore
@@ -49,6 +55,7 @@ public class User implements Contact {
         return User.builder()
             .id(id)
             .username(username)
+            .email(email)
             .password(password)
             .name(name)
             .avatar(avatar)
@@ -72,6 +79,15 @@ public class User implements Contact {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+    
+    public enum Status {
+        PENDING_ACTIVATION,
+        ACTIVE,
+        DEACTIVATED,
+        SUSPENDED,
+        BLOCKED,
+        PERMANENTLY_CLOSED
     }
     
 }

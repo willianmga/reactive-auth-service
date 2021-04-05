@@ -12,6 +12,7 @@ import live.socialchat.auth.signup.model.SignupRequest;
 import live.socialchat.auth.user.UserRepository;
 import live.socialchat.auth.user.model.Contact.ContactType;
 import live.socialchat.auth.user.model.User;
+import live.socialchat.auth.user.model.User.Status;
 import live.socialchat.auth.validation.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,32 +50,34 @@ public class SignUpServiceImpl implements SignUpService {
     
         validationService.validateSignUpRequest(signupRequest);
         
-        return Mono.just(mapNewToUser(signupRequest))
+        return Mono.just(mapToNewUser(signupRequest))
             .flatMap(userRepository::create)
             .switchIfEmpty(Mono.error(new ChatException("Failed to create User", SERVER_ERROR)))
-            .flatMap(user -> mapToAutenticateRequest(user, signupRequest.getPassword()))
+            .flatMap(user -> mapToAuthenticateRequest(user, signupRequest.getPassword()))
             .flatMap(authenticationService::authenticate)
             .switchIfEmpty(Mono.error(new ChatException("Failed to authenticate User", AUTHENTICATION_ERROR)));
     }
     
-    private User mapNewToUser(final SignupRequest signupRequest) {
+    private User mapToNewUser(final SignupRequest signupRequest) {
         
         final String hashedPassword = hashingService.hash(signupRequest.getPassword());
         
         return User.builder()
             .id(UUID.randomUUID().toString())
             .username(signupRequest.getUsername().toLowerCase())
+            .email(signupRequest.getEmail().toLowerCase())
             .password(hashedPassword)
             .name(signupRequest.getName())
             .avatar(avatarService.pickRandomAvatar())
             .description(DEFAULT_DESCRIPTION)
             .contactType(ContactType.USER)
             .createdDate(OffsetDateTime.now().toString())
+            .status(Status.PENDING_ACTIVATION)
             .build();
     }
     
-    private Mono<AuthenticateRequest> mapToAutenticateRequest(final User user,
-                                                              final String password) {
+    private Mono<AuthenticateRequest> mapToAuthenticateRequest(final User user,
+                                                               final String password) {
         return Mono.just(AuthenticateRequest.builder()
             .username(user.getUsername())
             .password(password)

@@ -31,7 +31,12 @@ Authentication Service of SocialChat
 * ```POST /v1/auth``` : Authenticates a user and creates a session
 * ```POST /v1/auth/logoff``` : Invalidates a previously created session
 * ```POST /v1/auth/token/valid``` : Validates a JWT token confirming whether a session is valid or not.
-* ```POST /v1/signup``` : Registers and authenticates a new user 
+* ```POST /v1/signup``` : Registers and authenticates a new user
+
+* ```POST /v1/account/password/activate``` : Activates an account
+* ```POST /v1/account/password/reset``` : Requests a token to update account password
+* ```PUT  /v1/account/password/reset``` : Updates an account password
+ 
 
 ## Environment Variables Accepted
 * CHAT_MONGO_SERVER

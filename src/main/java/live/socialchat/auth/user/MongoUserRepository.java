@@ -1,17 +1,18 @@
 package live.socialchat.auth.user;
 
+import com.mongodb.client.model.Filters;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import com.mongodb.reactivestreams.client.MongoDatabase;
-import live.socialchat.auth.exception.RequestValidationException;
-import live.socialchat.auth.exception.RequestValidationException.ValidationType;
 import live.socialchat.auth.user.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 
@@ -22,7 +23,7 @@ public class MongoUserRepository implements UserRepository {
     private static final String USER_COLLECTION_NAME = "user";
     private static final String USER_ID = "_id";
     private static final String USERNAME = "username";
-    private static final String CONTACT_TYPE = "contactType";
+    private static final String EMAIL = "email";
     
     private final MongoCollection<User> mongoCollection;
     
@@ -33,13 +34,6 @@ public class MongoUserRepository implements UserRepository {
     
     @Override
     public Mono<User> create(final User user) {
-    
-        usernameExists(user.getUsername())
-            .blockOptional()
-            .ifPresent((result) -> {
-                throw new RequestValidationException( "username already taken", ValidationType.USERNAME_IN_USE);
-            });
-
         return Mono.from(mongoCollection.insertOne(user))
             .doOnSuccess(result -> LOGGER.info("Inserted user {}", result.getInsertedId()))
             .doOnError(error -> LOGGER.info("Failed to insert user. Reason: {}", error.getMessage()))
@@ -55,12 +49,24 @@ public class MongoUserRepository implements UserRepository {
             );
     }
 
-    private Mono<User> usernameExists(final String username) {
-        
-        return Mono.from(
-            mongoCollection.find(eq(USERNAME, username))
-                .projection(fields(include(USER_ID)))
-                .first()
+    @Override
+    public Flux<User> findByUsernameOrEmail(final String email, final String username) {
+        return Flux.from(
+                mongoCollection.find(
+                    or(
+    
+                        Filters.text()
+                        
+                        eq(EMAIL, email),
+                        eq(USERNAME, username)
+                    )
+                )
+                .projection(
+                    fields(
+                        include(USER_ID, EMAIL, USERNAME)
+                    )
+                )
+                .limit(2)
             );
     }
 

@@ -1,7 +1,7 @@
 package live.socialchat.auth.exception;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,21 +13,21 @@ public class RequestValidationException extends ChatException {
 
     private static final String MESSAGE = "Invalid request. Correct the errors and try again";
     
-    private final List<ValidationError> errors;
+    private final Set<ValidationError> errors;
     
-    public RequestValidationException(final List<ValidationError> errors) {
+    public RequestValidationException(final Set<ValidationError> errors) {
         super(MESSAGE, INVALID_REQUEST);
-        this.errors = Collections.unmodifiableList(errors);
+        this.errors = Collections.unmodifiableSet(errors);
     }
     
     public RequestValidationException(final ValidationError error) {
         super(MESSAGE, INVALID_REQUEST);
-        this.errors = Collections.singletonList(error);
+        this.errors = Collections.singleton(error);
     }
     
     public RequestValidationException(final String message, final ValidationType type) {
         super(MESSAGE, INVALID_REQUEST);
-        this.errors = Collections.singletonList(new ValidationError(message, type));
+        this.errors = Collections.singleton(new ValidationError(message, type));
     }
     
     @Getter
@@ -40,9 +40,10 @@ public class RequestValidationException extends ChatException {
     
     public enum ValidationType {
         INVALID_NAME,
-        INVALID_USERNAME,
+        INVALID_EMAIL,
         INVALID_PASSWORD,
         USERNAME_IN_USE,
+        EMAIL_IN_USE,
     }
     
 }
