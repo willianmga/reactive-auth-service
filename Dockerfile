@@ -9,7 +9,6 @@ LABEL maintainer="willian.azevedo (willian-mga@hotmail.com)"
 COPY --from=builder /opt/socialchat/auth/target/social-chat-auth-service.jar /opt/socialchat/social-chat-auth-service.jar
 WORKDIR /opt/socialchat
 
-ENV PORT=8080
 ENV CHAT_MONGO_SERVER=localhost:27017
 ENV CHAT_MONGO_USERNAME=evitcaer
 ENV CHAT_MONGO_PASSWORD=johnjones
