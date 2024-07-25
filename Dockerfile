@@ -3,7 +3,7 @@ COPY . /opt/socialchat/auth
 WORKDIR /opt/socialchat/auth
 RUN mvn clean package
 
-FROM openjdk:8-jdk-alpine
+FROM openjdk:18-jdk-alpine
 
 LABEL maintainer="willian.azevedo (willian-mga@hotmail.com)"
 COPY --from=builder /opt/socialchat/auth/target/social-chat-auth-service.jar /opt/socialchat/social-chat-auth-service.jar
