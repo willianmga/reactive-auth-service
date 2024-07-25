@@ -5,5 +5,5 @@ updates:
   schedule:
     interval: 'daily'
     time: '12:16'
-    timezone: 'Europe/Londo'
+    timezone: 'Europe/London'
   
