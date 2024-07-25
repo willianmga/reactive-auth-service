@@ -1,4 +1,4 @@
-FROM maven:3.8.5-jdk-8 AS builder
+FROM maven:3-jdk-9 AS builder
 COPY . /opt/socialchat/auth
 WORKDIR /opt/socialchat/auth
 RUN mvn clean package
